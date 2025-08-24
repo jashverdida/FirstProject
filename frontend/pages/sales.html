@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales - Sari-Sari POS</title>
+    <link rel="stylesheet" href="../css/sales.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <i class="fas fa-store"></i>
+                <span>Sari-Sari POS</span>
+            </div>
+            
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="dashboard.html">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="inventory.html">
+                        <i class="fas fa-boxes"></i>
+                        <span>Inventory</span>
+                    </a>
+                </li>
+                <li class="nav-item active">
+                    <a href="sales.html">
+                        <i class="fas fa-cash-register"></i>
+                        <span>Sales</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="reports.html">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Reports</span>
+                    </a>
+                </li>
+            </ul>
+            
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <i class="fas fa-user-circle"></i>
+                    <span id="currentUser">Admin</span>
+                </div>
+                <button class="logout-btn" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Logout
+                </button>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="sales-container">
+                <!-- Product Selection Panel -->
+                <div class="product-panel">
+                    <div class="panel-header">
+                        <h2>Products</h2>
+                        <div class="search-box">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="productSearch" placeholder="Search or scan barcode...">
+                        </div>
+                    </div>
+                    
+                    <div class="category-tabs">
+                        <button class="tab-btn active" data-category="">All</button>
+                        <button class="tab-btn" data-category="Food">Food</button>
+                        <button class="tab-btn" data-category="Beverages">Drinks</button>
+                        <button class="tab-btn" data-category="Personal Care">Care</button>
+                        <button class="tab-btn" data-category="Staples">Staples</button>
+                    </div>
+                    
+                    <div class="products-grid" id="productsGrid">
+                        <div class="loading">Loading products...</div>
+                    </div>
+                </div>
+
+                <!-- Cart Panel -->
+                <div class="cart-panel">
+                    <div class="panel-header">
+                        <h2>Current Sale</h2>
+                        <button class="btn btn-secondary" onclick="clearCart()">
+                            <i class="fas fa-trash"></i>
+                            Clear
+                        </button>
+                    </div>
+                    
+                    <div class="cart-items" id="cartItems">
+                        <div class="empty-cart">
+                            <i class="fas fa-shopping-cart"></i>
+                            <p>No items in cart</p>
+                        </div>
+                    </div>
+                    
+                    <div class="cart-summary">
+                        <div class="summary-row">
+                            <span>Subtotal:</span>
+                            <span id="subtotal">₱0.00</span>
+                        </div>
+                        <div class="summary-row">
+                            <span>Tax (0%):</span>
+                            <span id="tax">₱0.00</span>
+                        </div>
+                        <div class="summary-row total">
+                            <span>Total:</span>
+                            <span id="total">₱0.00</span>
+                        </div>
+                    </div>
+                    
+                    <div class="payment-section">
+                        <div class="form-group">
+                            <label for="paymentMethod">Payment Method</label>
+                            <select id="paymentMethod">
+                                <option value="cash">Cash</option>
+                                <option value="card">Card</option>
+                                <option value="gcash">GCash</option>
+                            </select>
+                        </div>
+                        
+                        <div class="cash-payment" id="cashPayment">
+                            <div class="form-group">
+                                <label for="amountReceived">Amount Received (₱)</label>
+                                <input type="number" id="amountReceived" step="0.01" min="0" placeholder="0.00">
+                            </div>
+                            <div class="change-display">
+                                <span>Change: </span>
+                                <span id="changeAmount">₱0.00</span>
+                            </div>
+                        </div>
+                        
+                        <button class="btn btn-primary btn-large" id="processPaymentBtn" onclick="processPayment()" disabled>
+                            <i class="fas fa-credit-card"></i>
+                            Process Payment
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Receipt Modal -->
+    <div id="receiptModal" class="modal">
+        <div class="modal-content receipt-modal">
+            <div class="modal-header">
+                <h3>Payment Successful</h3>
+                <span class="close" onclick="closeReceiptModal()">&times;</span>
+            </div>
+            
+            <div class="receipt-container">
+                <div class="receipt" id="receipt">
+                    <!-- Receipt content will be generated here -->
+                </div>
+                
+                <div class="receipt-actions">
+                    <button class="btn btn-primary" onclick="printReceipt()">
+                        <i class="fas fa-print"></i>
+                        Print Receipt
+                    </button>
+                    <button class="btn btn-secondary" onclick="newSale()">
+                        <i class="fas fa-plus"></i>
+                        New Sale
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Product Quick Add Modal -->
+    <div id="quickAddModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add to Cart</h3>
+                <span class="close" onclick="closeQuickAddModal()">&times;</span>
+            </div>
+            
+            <div class="modal-body">
+                <div class="product-info">
+                    <h4 id="quickAddProductName"></h4>
+                    <p class="price" id="quickAddPrice"></p>
+                    <p class="stock" id="quickAddStock"></p>
+                </div>
+                
+                <div class="quantity-input">
+                    <label for="quantity">Quantity</label>
+                    <div class="quantity-controls">
+                        <button type="button" onclick="decreaseQuantity()">-</button>
+                        <input type="number" id="quantity" value="1" min="1">
+                        <button type="button" onclick="increaseQuantity()">+</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-actions">
+                <button type="button" class="btn btn-secondary" onclick="closeQuickAddModal()">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="addToCart()">Add to Cart</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/sales.js"></script>
+</body>
+</html>
